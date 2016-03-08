@@ -8,9 +8,19 @@ project.currentStyle.strokeColor = 'black'
 project.currentStyle.strokeWidth = 5
 makePendula $("#slider")[0].value
 window.makePendula = makePendula
+
+slider = $("#slider")[0]
+checkbox = $("#checkbox")[0]
+
 $("#slider").on 'input', ->
-  makePendula this.value
+  updatePendulums()
+
+$("#checkbox").change ->
+  updatePendulums()
   
+updatePendulums = ->
+  makePendula slider.value, checkbox.checked
+
 i = 0
 view.onFrame = () ->
   skip = (i % 2) is 0

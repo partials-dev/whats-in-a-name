@@ -17,8 +17,12 @@ clearExistingPendula = ->
   audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 
 
-defineOscillatorFunctions = (masses) ->
-  getPeriod = (i) -> FRAME_RATE * (1 / Math.pow(2, 6)) * (60 / (65 + i))
+defineOscillatorFunctions = (masses, slow = true) ->
+  getPeriod = (i) ->
+    p = FRAME_RATE * (60 / (65 + i))
+    # transpose period up 8 octaves
+    p *= 1 / Math.pow(2, 8) unless slow
+    p
   axis = new Point 50, 0
   masses.map (mass, i) ->
     period = getPeriod i
@@ -32,9 +36,11 @@ updateSumMass = (deltas) ->
     previous.add current
   sumMass.position = sumMass.data.originalPosition.add sum
 
-synth = (frequencies) ->
+synth = (frequencies, slow) ->
   frequencies.map (freq) ->
-    audibleFrequency = freq #* Math.pow 2, 8
+    audibleFrequency = freq
+    audibleFrequency *= Math.pow 2, 8 if slow
+
     # osc
     oscillator = audioCtx.createOscillator()
     oscillator.type = 'sine'
@@ -49,7 +55,7 @@ synth = (frequencies) ->
     gainNode.connect audioCtx.destination
     oscillator.start()
 
-makePendula = (n) ->
+makePendula = (n, slow) ->
   clearExistingPendula()
 
   ys = mth.regularDistribution min: 0, max: view.bounds.height, samples: n, inclusive: true
@@ -59,8 +65,9 @@ makePendula = (n) ->
   sumMass = new Shape.Circle x: view.center.x + (view.bounds.width / 4), y: view.center.y, massRadius
   sumMass.data.originalPosition = sumMass.position
 
-  oscillators = defineOscillatorFunctions masses
-  synth oscillators.map (osc) -> 1 / (osc.period / FRAME_RATE)
+  oscillators = defineOscillatorFunctions masses, slow
+  frequencies = oscillators.map (osc) -> 1 / (osc.period / FRAME_RATE)
+  synth frequencies, slow
   oscillateMasses = ->
     deltas = (osc() for osc in oscillators)
     updateSumMass deltas

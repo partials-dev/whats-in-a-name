@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="style.css" media="screen" charset="utf-8">
   </head>
   <body>
-    <input id="slider" value="40" style="position: absolute;" type="range" min="0", max="200" />
+    <div style="position: absolute;">
+      <input id="slider" value="40" type="range" min="0", max="200" />
+      <input id="checkbox" checked="checked" type="checkbox" />
+    </div>
     <div>
       <canvas id="canv" data-paper-resize="true" data-paper-keepalive="true"></canvas>
     </div>
